@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+
+<html lang="en" style="color-scheme:dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="StudyAI">
+<meta name="theme-color" content="#08080f">
+<title>StudyAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── FORCE DARK ── */
+html, body {
+  background: #08080f !important;
+  color: #eeeef5 !important;
+  color-scheme: dark !important;
+}
+
+:root {
+–bg: #08080f;
+–bg2: #0e0e1a;
+–card: #13131f;
+–card2: #1b1b2a;
+–border: rgba(255,255,255,0.07);
+–border2: rgba(255,255,255,0.12);
+–p: #8b7fff;
+–p2: #a99fff;
+–pink: #ff6b9d;
+–teal: #00d4aa;
+–gold: #ffd166;
+–text: #eeeef5;
+–sub: #9999b8;
+–dim: #55556a;
+–err: #ff5f7e;
+}
+
+- { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+body {
+font-family: ‘DM Sans’, -apple-system, sans-serif;
+min-height: 100dvh;
+overflow-x: hidden;
+-webkit-font-smoothing: antialiased;
+}
+
+/* ── MESH BACKGROUND ── */
+body::after {
+content:’’;
+position:fixed; inset:0;
+background:
+radial-gradient(ellipse 60% 50% at 80% -10%, rgba(139,127,255,0.18) 0%, transparent 60%),
+radial-gradient(ellipse 50% 40% at -10% 80%, rgba(255,107,157,0.12) 0%, transparent 60%),
+radial-gradient(ellipse 40% 30% at 50% 110%, rgba(0,212,170,0.08) 0%, transparent 60%);
+pointer-events:none;
+z-index:0;
+}
+
+.screen { display:none; position:relative; z-index:1; }
+.screen.active { display:flex; flex-direction:column; min-height:100dvh; }
+.scrollable { overflow-y:auto; -webkit-overflow-scrolling:touch; flex:1; }
+
+/* ══════════════════════════════════════
+API KEY SCREEN
+══════════════════════════════════════ */
+#screen-key {
+align-items:center;
+justify-content:center;
+padding:48px 24px;
+text-align:center;
+gap:0;
+}
+
+.logo-wrap { margin-bottom:36px; }
+.logo-icon {
+width:72px; height:72px;
+background: linear-gradient(135deg, #8b7fff, #ff6b9d);
+border-radius:22px;
+display:flex; align-items:center; justify-content:center;
+font-size:32px;
+margin:0 auto 16px;
+box-shadow: 0 8px 32px rgba(139,127,255,0.35);
+}
+.logo-name {
+font-family:‘Syne’,sans-serif;
+font-size:28px; font-weight:800;
+background: linear-gradient(135deg, #c4baff, #ff9ac0);
+-webkit-background-clip:text; -webkit-text-fill-color:transparent;
+letter-spacing:-0.5px;
+}
+.logo-tag {
+font-family:‘DM Mono’,monospace;
+font-size:11px; color:var(–dim);
+letter-spacing:0.12em;
+margin-top:6px;
+}
+
+.key-card {
+background: var(–card);
+border: 1px solid var(–border2);
+border-radius:24px;
+padding:28px 24px;
+width:100%; max-width:380px;
+text-align:left;
+box-shadow: 0 24px 48px rgba(0,0,0,0.4);
+}
+.key-card-title {
+font-family:‘Syne’,sans-serif;
+font-size:17px; font-weight:700;
+margin-bottom:8px;
+}
+.key-card p {
+font-size:13px; color:var(–sub); line-height:1.65;
+margin-bottom:22px;
+}
+.key-card p a { color:var(–p2); text-decoration:none; }
+
+.inp {
+width:100%;
+background: var(–bg2);
+border: 1px solid var(–border2);
+border-radius:14px;
+padding:14px 16px;
+color: var(–text) !important;
+font-family:‘DM Mono’,monospace;
+font-size:13px;
+outline:none;
+transition:border-color 0.2s, box-shadow 0.2s;
+margin-bottom:14px;
+-webkit-appearance:none;
+background-color: var(–bg2) !important;
+}
+.inp:focus { border-color:var(–p); box-shadow: 0 0 0 3px rgba(139,127,255,0.15); }
+.inp::placeholder { color:var(–dim); }
+textarea.inp { resize:none; font-family:‘DM Sans’,sans-serif; font-size:14px; line-height:1.65; min-height:90px; }
+
+.btn {
+width:100%; padding:16px;
+border-radius:16px; border:none;
+font-family:‘Syne’,sans-serif;
+font-size:15px; font-weight:700;
+cursor:pointer; transition:all 0.2s;
+letter-spacing:0.02em;
+-webkit-appearance:none;
+}
+.btn-primary {
+background: linear-gradient(135deg, #8b7fff 0%, #b09fff 100%);
+color:#fff;
+box-shadow: 0 6px 24px rgba(139,127,255,0.4);
+}
+.btn-primary:active { transform:scale(0.97); box-shadow:0 3px 12px rgba(139,127,255,0.3); }
+.btn-ghost {
+background: var(–card2);
+color:var(–text);
+border:1px solid var(–border2);
+}
+.btn-danger {
+background: linear-gradient(135deg, #ff6b9d, #ff9ab5);
+color:#fff;
+box-shadow:0 6px 20px rgba(255,107,157,0.35);
+}
+.btn:disabled { opacity:0.45; cursor:not-allowed; }
+
+/* ══════════════════════════════════════
+HOME SCREEN
+══════════════════════════════════════ */
+#screen-home { padding-bottom:40px; }
+
+.home-header {
+padding:64px 22px 28px;
+position:relative;
+}
+.home-header::after {
+content:’’;
+position:absolute; bottom:0; left:22px; right:22px;
+height:1px;
+background: linear-gradient(90deg, transparent, var(–border2), transparent);
+}
+
+.home-eyebrow {
+display:inline-flex; align-items:center; gap:6px;
+background: rgba(139,127,255,0.12);
+border:1px solid rgba(139,127,255,0.2);
+border-radius:20px;
+padding:5px 12px;
+font-family:‘DM Mono’,monospace;
+font-size:10px; color:var(–p2);
+letter-spacing:0.12em;
+text-transform:uppercase;
+margin-bottom:16px;
+}
+.eyebrow-dot {
+width:6px; height:6px;
+border-radius:50%;
+background:var(–p);
+animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.home-title {
+font-family:‘Syne’,sans-serif;
+font-size:32px; font-weight:800;
+line-height:1.1; letter-spacing:-0.5px;
+margin-bottom:8px;
+}
+.home-title .hi { color:var(–text); }
+.home-title .name {
+background: linear-gradient(135deg, #a99fff, #ff9ac0);
+-webkit-background-clip:text; -webkit-text-fill-color:transparent;
+}
+.home-sub { font-size:14px; color:var(–sub); line-height:1.5; }
+
+/* MODE CARDS */
+.cards-wrap { padding:22px 16px 0; display:flex; flex-direction:column; gap:14px; }
+
+.mode-card {
+border-radius:24px;
+padding:22px 20px;
+cursor:pointer;
+position:relative;
+overflow:hidden;
+transition:transform 0.15s;
+border:1px solid var(–border2);
+}
+.mode-card:active { transform:scale(0.975); }
+
+.mode-card.card-marker {
+background: linear-gradient(145deg, #16152a 0%, #110f24 100%);
+}
+.mode-card.card-tutor {
+background: linear-gradient(145deg, #1f1220 0%, #150d1a 100%);
+}
+
+.card-glow {
+position:absolute;
+width:180px; height:180px;
+border-radius:50%;
+filter:blur(50px);
+pointer-events:none;
+top:-40px; right:-40px;
+opacity:0.6;
+}
+.card-marker .card-glow { background:rgba(139,127,255,0.25); }
+.card-tutor .card-glow { background:rgba(255,107,157,0.2); }
+
+.card-header { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+.card-emoji {
+width:46px; height:46px;
+border-radius:14px;
+display:flex; align-items:center; justify-content:center;
+font-size:22px;
+flex-shrink:0;
+}
+.card-marker .card-emoji { background:rgba(139,127,255,0.15); }
+.card-tutor .card-emoji { background:rgba(255,107,157,0.15); }
+
+.card-title {
+font-family:‘Syne’,sans-serif;
+font-size:19px; font-weight:700;
+}
+.card-marker .card-title { color:#c4baff; }
+.card-tutor .card-title { color:#ffaacc; }
+
+.card-desc { font-size:13px; color:var(–sub); line-height:1.6; margin-bottom:14px; }
+
+.card-pills { display:flex; flex-wrap:wrap; gap:6px; }
+.cpill {
+padding:4px 10px;
+border-radius:20px;
+font-size:10px;
+font-family:‘DM Mono’,monospace;
+letter-spacing:0.06em;
+}
+.card-marker .cpill { background:rgba(139,127,255,0.12); color:#a99fff; border:1px solid rgba(139,127,255,0.2); }
+.card-tutor .cpill { background:rgba(255,107,157,0.12); color:#ff9ac0; border:1px solid rgba(255,107,157,0.2); }
+
+/* FOOTER KEY */
+.key-footer {
+margin:20px 16px 0;
+padding:14px 16px;
+background:var(–card);
+border:1px solid var(–border2);
+border-radius:18px;
+display:flex; align-items:center; gap:12px;
+}
+.kf-icon { font-size:18px; }
+.kf-text { font-size:12px; color:var(–sub); flex:1; line-height:1.4; }
+.kf-text strong { color:var(–text); }
+.kf-btn {
+font-size:11px; color:var(–err);
+font-family:‘DM Mono’,monospace;
+padding:6px 12px;
+border-radius:10px;
+background:rgba(255,95,126,0.1);
+border:1px solid rgba(255,95,126,0.2);
+cursor:pointer; white-space:nowrap;
+}
+
+/* ══════════════════════════════════════
+TOOL SCREENS SHARED
+══════════════════════════════════════ */
+.tool-header {
+padding:56px 18px 18px;
+display:flex; align-items:center; gap:14px;
+border-bottom:1px solid var(–border);
+background: linear-gradient(180deg, var(–bg2) 0%, transparent 100%);
+}
+.back-btn {
+width:40px; height:40px;
+background:var(–card);
+border:1px solid var(–border2);
+border-radius:12px;
+display:flex; align-items:center; justify-content:center;
+cursor:pointer; font-size:17px; flex-shrink:0;
+color:var(–text);
+}
+.back-btn:active { background:var(–card2); }
+.th-title { font-family:‘Syne’,sans-serif; font-size:19px; font-weight:700; }
+.th-sub { font-size:12px; color:var(–sub); margin-top:2px; }
+
+.tool-body { padding:18px; }
+
+/* Subject pills */
+.subj-row { display:flex; gap:8px; margin-bottom:20px; overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:2px; scrollbar-width:none; }
+.subj-row::-webkit-scrollbar { display:none; }
+.spill {
+flex-shrink:0; padding:8px 16px; border-radius:20px;
+border:1px solid var(–border2);
+background:var(–card);
+font-size:12px; cursor:pointer;
+font-family:‘DM Mono’,monospace; color:var(–sub);
+transition:all 0.15s; white-space:nowrap;
+}
+.spill.on { background:rgba(139,127,255,0.18); border-color:rgba(139,127,255,0.4); color:#c4baff; }
+
+.flabel {
+font-size:10px; font-family:‘DM Mono’,monospace;
+color:var(–dim); letter-spacing:0.12em;
+text-transform:uppercase; display:block; margin-bottom:8px;
+}
+
+.marks-row { display:flex; gap:10px; margin-bottom:14px; }
+.marks-row .inp { margin-bottom:0; flex:1; }
+
+/* ── IMAGE ZONE ── */
+.img-zone {
+border:1.5px dashed rgba(255,255,255,0.1);
+border-radius:16px;
+padding:16px;
+text-align:center;
+cursor:pointer;
+margin-bottom:14px;
+background:var(–card);
+position:relative; overflow:hidden;
+transition:all 0.2s;
+}
+.img-zone.filled { border-color:rgba(0,212,170,0.4); border-style:solid; background:rgba(0,212,170,0.04); }
+.img-zone input[type=“file”] { position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer; }
+.iz-icon { font-size:20px; display:block; margin-bottom:4px; }
+.iz-text { font-size:13px; color:var(–sub); }
+.iz-hint { font-size:10px; color:var(–dim); margin-top:3px; font-family:‘DM Mono’,monospace; }
+
+.img-prev-wrap { position:relative; display:inline-block; margin-bottom:12px; max-width:100%; }
+.img-prev { max-width:100%; max-height:180px; border-radius:14px; border:1px solid var(–border2); display:block; }
+.img-x {
+position:absolute; top:-8px; right:-8px;
+width:24px; height:24px; background:var(–err);
+border-radius:50%; display:flex; align-items:center; justify-content:center;
+cursor:pointer; font-size:12px; color:#fff; font-weight:700; z-index:2;
+}
+
+/* ── RESPONSE BOX ── */
+.resp-box {
+background:var(–card);
+border:1px solid var(–border2);
+border-radius:20px;
+padding:20px;
+margin-top:18px;
+display:none;
+}
+.resp-box.show { display:block; }
+.resp-box.loading { display:flex; align-items:center; gap:12px; color:var(–sub); }
+.resp-head {
+display:flex; align-items:center; justify-content:space-between;
+margin-bottom:16px; padding-bottom:14px;
+border-bottom:1px solid var(–border);
+}
+.resp-label { font-family:‘DM Mono’,monospace; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(–dim); }
+.score { font-family:‘Syne’,sans-serif; font-size:20px; font-weight:800; }
+.s-hi { color:var(–teal); }
+.s-mid { color:var(–gold); }
+.s-lo { color:var(–err); }
+.resp-body { font-size:14px; line-height:1.75; color:var(–text); white-space:pre-wrap; }
+
+/* ── CHAT ── */
+.chat-msgs { display:flex; flex-direction:column; gap:14px; margin-bottom:16px; min-height:40px; }
+.msg { max-width:88%; padding:13px 16px; border-radius:18px; font-size:14px; line-height:1.65; }
+.msg-u { align-self:flex-end; background:linear-gradient(135deg,#8b7fff,#6b5fff); color:#fff; border-bottom-right-radius:5px; }
+.msg-a { align-self:flex-start; background:var(–card); border:1px solid var(–border2); border-bottom-left-radius:5px; white-space:pre-wrap; color:var(–text); }
+.msg-img { max-width:180px; max-height:150px; border-radius:12px; border:2px solid rgba(255,255,255,0.15); display:block; margin-bottom:6px; }
+
+.chat-clear { font-size:11px; color:var(–dim); cursor:pointer; font-family:‘DM Mono’,monospace; text-align:right; margin-bottom:12px; display:block; }
+
+/* Attach row */
+.attach-row { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+.attach-btn {
+width:42px; height:42px; border-radius:13px;
+background:var(–card); border:1px solid var(–border2);
+display:flex; align-items:center; justify-content:center;
+cursor:pointer; font-size:18px; flex-shrink:0;
+position:relative; transition:all 0.15s;
+}
+.attach-btn input[type=“file”] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+.attach-btn.on { background:rgba(0,212,170,0.12); border-color:rgba(0,212,170,0.35); }
+.at-info { font-size:12px; color:var(–sub); flex:1; }
+.at-rm { font-size:11px; color:var(–err); cursor:pointer; font-family:‘DM Mono’,monospace; padding:5px 10px; border-radius:8px; background:rgba(255,95,126,0.1); display:none; }
+.tutor-thumb { max-height:100px; border-radius:12px; border:1.5px solid rgba(0,212,170,0.4); margin-bottom:10px; display:none; max-width:100%; }
+
+.cin-row { display:flex; gap:10px; align-items:flex-end; }
+.cin-row textarea { flex:1; min-height:48px; max-height:140px; margin-bottom:0; border-radius:15px; padding:13px 15px; font-size:14px; }
+.send-btn {
+width:48px; height:48px; border-radius:15px;
+background:linear-gradient(135deg,#8b7fff,#6b5fff);
+border:none; color:#fff; font-size:20px;
+cursor:pointer; flex-shrink:0;
+display:flex; align-items:center; justify-content:center;
+box-shadow:0 4px 16px rgba(139,127,255,0.4);
+transition:all 0.15s;
+}
+.send-btn:active { transform:scale(0.9); }
+.send-btn:disabled { opacity:0.4; box-shadow:none; }
+
+/* Spinner */
+.spin { width:18px; height:18px; border:2px solid var(–border2); border-top-color:var(–p); border-radius:50%; animation:rot 0.7s linear infinite; flex-shrink:0; }
+@keyframes rot { to{transform:rotate(360deg)} }
+.tdot { display:inline-block; width:7px; height:7px; border-radius:50%; background:var(–sub); margin:0 2px; animation:bop 1.2s infinite; }
+.tdot:nth-child(2){animation-delay:0.2s} .tdot:nth-child(3){animation-delay:0.4s}
+@keyframes bop{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-7px)}}
+
+/* Modal */
+.modal-bg { position:fixed; inset:0; background:rgba(0,0,0,0.75); display:none; align-items:center; justify-content:center; z-index:100; padding:20px; backdrop-filter:blur(6px); }
+.modal-bg.open { display:flex; }
+.modal-box { background:var(–card); border:1px solid var(–border2); border-radius:24px; padding:28px 24px; max-width:340px; width:100%; box-shadow:0 32px 64px rgba(0,0,0,0.5); }
+.modal-box h3 { font-family:‘Syne’,sans-serif; font-size:18px; font-weight:700; margin-bottom:8px; }
+.modal-box p { font-size:13px; color:var(–sub); line-height:1.6; margin-bottom:22px; }
+.modal-btns { display:flex; gap:10px; }
+.modal-btns .btn { flex:1; padding:13px; font-size:14px; }
+
+/* Anim */
+@keyframes up { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+.up { animation:up 0.3s ease forwards; }
+</style>
+
+</head>
+<body>
+
+<!-- HOME -->
+
+<div id="screen-key" class="screen active">
+  <div class="logo-wrap" style="margin-top:0">
+    <div class="logo-icon">🧠</div>
+    <div class="logo-name">StudyAI</div>
+    <div class="logo-tag">AQA BIOLOGY · CHEMISTRY · EDEXCEL ECON</div>
+  </div>
+  <div class="key-card up">
+    <div class="key-card-title">Enter your API Key</div>
+    <p>Stored only on this device — never shared.<br>Get yours free at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></p>
+    <input type="password" id="keyInput" class="inp" placeholder="sk-ant-api03-..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    <button class="btn btn-primary" onclick="saveKey()">Save & Get Started →</button>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+
+<div id="screen-home" class="screen scrollable">
+  <div class="home-header">
+    <div class="home-eyebrow"><span class="eyebrow-dot"></span> Exams May–June 2026</div>
+    <div class="home-title">
+      <span class="hi">Let's lock in,</span><br>
+      <span class="name">Sami.</span>
+    </div>
+    <div class="home-sub">Pick a tool and get to work. بَارَكَ اللهُ فِيكَ</div>
+  </div>
+
+  <div class="cards-wrap">
+
+```
+<div class="mode-card card-marker" onclick="goTo('screen-marker')">
+  <div class="card-glow"></div>
+  <div class="card-header">
+    <div class="card-emoji">📝</div>
+    <div>
+      <div class="card-title">Exam Marker</div>
+    </div>
+  </div>
+  <div class="card-desc">Type or photograph a question + your answer. Get marked exactly like an AQA/Edexcel examiner — mark by mark, point by point.</div>
+  <div class="card-pills">
+    <span class="cpill">AQA</span>
+    <span class="cpill">EDEXCEL</span>
+    <span class="cpill">📷 PHOTO ANSWERS</span>
+    <span class="cpill">MARK SCHEME</span>
+  </div>
+</div>
+
+<div class="mode-card card-tutor" onclick="goTo('screen-tutor')">
+  <div class="card-glow"></div>
+  <div class="card-header">
+    <div class="card-emoji">💬</div>
+    <div>
+      <div class="card-title">AI Tutor</div>
+    </div>
+  </div>
+  <div class="card-desc">Chat or send a photo of your notes, a diagram, or a past paper. Spec-focused across Bio, Chem, and Econ — knows your weak points.</div>
+  <div class="card-pills">
+    <span class="cpill">CHAT</span>
+    <span class="cpill">SPEC-ONLY</span>
+    <span class="cpill">📷 IMAGES</span>
+    <span class="cpill">WEAK POINTS</span>
+  </div>
+</div>
+```
+
+  </div>
+
+  <div class="key-footer">
+    <span class="kf-icon">🔑</span>
+    <div class="kf-text"><strong>API key saved</strong> · calls go directly to Anthropic</div>
+    <span class="kf-btn" onclick="openModal()">Change</span>
+  </div>
+</div>
+
+<!-- EXAM MARKER -->
+
+<div id="screen-marker" class="screen scrollable">
+  <div class="tool-header">
+    <div class="back-btn" onclick="goTo('screen-home')">←</div>
+    <div>
+      <div class="th-title">📝 Exam Marker</div>
+      <div class="th-sub">Type or photo — full examiner feedback</div>
+    </div>
+  </div>
+  <div class="tool-body">
+
+```
+<span class="flabel">Subject</span>
+<div class="subj-row" id="mSubjs">
+  <div class="spill on" data-s="AQA Chemistry" onclick="selSubj(this,'mSubjs')">AQA Chem</div>
+  <div class="spill" data-s="AQA Biology" onclick="selSubj(this,'mSubjs')">AQA Bio</div>
+  <div class="spill" data-s="Edexcel A Economics" onclick="selSubj(this,'mSubjs')">Edexcel Econ</div>
+</div>
+
+<span class="flabel">Marks Available</span>
+<div class="marks-row">
+  <input type="number" id="mMarks" class="inp" placeholder="e.g. 6" min="1" max="25">
+</div>
+
+<span class="flabel">Question — type and / or upload photo</span>
+<textarea id="mQ" class="inp" placeholder="Type the question here, or upload a photo below..." rows="3"></textarea>
+<div id="mQWrap"></div>
+<div class="img-zone" id="mQZone">
+  <input type="file" id="mQFile" accept="image/*" onchange="loadImg(this,'mQWrap','mQZone','mq')">
+  <span class="iz-icon">📷</span>
+  <div class="iz-text">Photo of question</div>
+  <div class="iz-hint">past paper · textbook · worksheet</div>
+</div>
+
+<span class="flabel">Your Answer — type and / or upload photo</span>
+<textarea id="mA" class="inp" placeholder="Type your answer here, or upload a photo of your written work..." rows="5"></textarea>
+<div id="mAWrap"></div>
+<div class="img-zone" id="mAZone">
+  <input type="file" id="mAFile" accept="image/*" onchange="loadImg(this,'mAWrap','mAZone','ma')">
+  <span class="iz-icon">✍️</span>
+  <div class="iz-text">Photo of handwritten answer</div>
+  <div class="iz-hint">photograph your written work</div>
+</div>
+
+<span class="flabel">Mark Scheme (optional)</span>
+<textarea id="mScheme" class="inp" placeholder="Paste mark scheme points if you have them..." rows="3"></textarea>
+
+<button class="btn btn-primary" id="markBtn" onclick="doMark()" style="margin-top:4px">Mark My Answer ✓</button>
+<div class="resp-box" id="mResp"></div>
+```
+
+  </div>
+</div>
+
+<!-- TUTOR -->
+
+<div id="screen-tutor" class="screen scrollable">
+  <div class="tool-header">
+    <div class="back-btn" onclick="goTo('screen-home')">←</div>
+    <div>
+      <div class="th-title">💬 AI Tutor</div>
+      <div class="th-sub">Ask anything — text or image</div>
+    </div>
+  </div>
+  <div class="tool-body">
+
+```
+<span class="flabel">Subject</span>
+<div class="subj-row" id="tSubjs">
+  <div class="spill on" data-s="AQA Chemistry" onclick="selSubj(this,'tSubjs')">AQA Chem</div>
+  <div class="spill" data-s="AQA Biology" onclick="selSubj(this,'tSubjs')">AQA Bio</div>
+  <div class="spill" data-s="Edexcel A Economics" onclick="selSubj(this,'tSubjs')">Edexcel Econ</div>
+  <div class="spill" data-s="General" onclick="selSubj(this,'tSubjs')">General</div>
+</div>
+
+<span class="chat-clear" onclick="clearChat()">Clear chat ✕</span>
+
+<div class="chat-msgs" id="chatMsgs"></div>
+
+<div id="typing" style="display:none;margin-bottom:14px;">
+  <div class="msg msg-a" style="display:inline-flex;gap:2px;align-items:center;padding:12px 16px;">
+    <span class="tdot"></span><span class="tdot"></span><span class="tdot"></span>
+  </div>
+</div>
+
+<img id="tThumb" class="tutor-thumb">
+<div class="attach-row">
+  <div class="attach-btn" id="aBtn">
+    <input type="file" id="tFile" accept="image/*" onchange="attachImg(this)">
+    📷
+  </div>
+  <span class="at-info" id="aInfo">Attach an image</span>
+  <span class="at-rm" id="aRm" onclick="rmImg()">Remove ✕</span>
+</div>
+
+<div class="cin-row">
+  <textarea id="tInput" class="inp" placeholder="Ask anything..." rows="2" onkeydown="tKey(event)"></textarea>
+  <button class="send-btn" id="sendBtn" onclick="sendMsg()">↑</button>
+</div>
+```
+
+  </div>
+</div>
+
+<!-- MODAL -->
+
+<div class="modal-bg" id="modal">
+  <div class="modal-box">
+    <h3>Change API Key?</h3>
+    <p>Your saved key will be cleared. Chat history stays.</p>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger" onclick="doReset()">Change Key</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE
+let history = [];
+let tImg = null; // { base64, mediaType, src }
+let mImgs = { mq: null, ma: null };
+const URL = 'https://api.anthropic.com/v1/messages';
+
+const SYS_MARK = `You are a strict but fair AQA/Edexcel A-Level examiner marking Sami's answer. Sami is 18, targeting A* in AQA Biology, AQA Chemistry, Edexcel A Economics.
+
+For each mark point: state ✓ (earned), ~ (partial), or ✗ (missed). Quote student's words when relevant. Be spec-accurate — no credit for vague waffle.
+End with "TOTAL: X/Y marks" then a 1-2 line "Examiner Note" on the single most important improvement.
+If images provided: read carefully — question image may be a past paper photo; answer image may be handwritten — transcribe and mark it.
+Chemistry: AQA spec. Biology: AQA spec. Economics: Edexcel A (KAAE awareness).`;
+
+const SYS_TUTOR = `You are StudyAI — elite A-Level tutor for Sami, 18-year-old Muslim student in London. Target: A* in AQA Biology, AQA Chemistry, Edexcel A Economics (exams summer 2026).
+
+Rules: spec-accurate, no fluff, exam-ready language. Mnemonics and worked examples where helpful. After explaining, give a practice question. Show full working for calculations. If image sent: analyse carefully — could be diagram, graph, past paper, notes.
+
+Priority weak points:
+Chem P1: Transition metals, Born-Haber, EMF/cells, Period 3, Bonding/shapes, Le Chatelier, Kp, Group 2/7, TOF/MS, Back titrations
+Chem P2: Mechanisms, Rate equations, Optical isomerism, Esters, Amines, NMR, IR spectroscopy, Synthesis
+Bio P1: Biological molecules, Cell division maths, Statistical tests, Gas exchange, Microscopy, Meiosis
+Econ P1: Elasticity, PPF, Business objectives, Externalities, Efficiency types
+
+End every response with a short motivational note — authentic sahih/hasan hadith only, no Arabic script, cite collection.`;
+
+// INIT
+window.addEventListener('load', () => {
+  document.documentElement.style.backgroundColor = '#08080f';
+  document.body.style.backgroundColor = '#08080f';
+  if (localStorage.getItem('sai_key')) goTo('screen-home');
+  else goTo('screen-key');
+});
+
+// NAV
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const t = document.getElementById(id);
+  t.classList.add('active');
+  t.scrollTop = 0;
+  t.style.opacity = '0';
+  requestAnimationFrame(() => { t.style.transition = 'opacity 0.22s'; t.style.opacity = '1'; });
+}
+
+// KEY
+function saveKey() {
+  const k = document.getElementById('keyInput').value.trim();
+  if (!k.startsWith('sk-ant-')) { alert('Should start with sk-ant-'); return; }
+  localStorage.setItem('sai_key', k);
+  document.getElementById('keyInput').value = '';
+  goTo('screen-home');
+}
+const getKey = () => localStorage.getItem('sai_key');
+function openModal() { document.getElementById('modal').classList.add('open'); }
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+function doReset() { localStorage.removeItem('sai_key'); closeModal(); goTo('screen-key'); }
+
+// SUBJECTS
+function selSubj(el, gid) {
+  document.querySelectorAll('#'+gid+' .spill').forEach(p => p.classList.remove('on'));
+  el.classList.add('on');
+}
+const getSubj = gid => { const a = document.querySelector('#'+gid+' .spill.on'); return a ? a.dataset.s : 'AQA Chemistry'; };
+
+// MARKER IMAGES
+function loadImg(input, wid, zid, key) {
+  const file = input.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = e => {
+    mImgs[key] = { base64: e.target.result.split(',')[1], mediaType: file.type||'image/jpeg', src: e.target.result };
+    document.getElementById(wid).innerHTML = `<div class="img-prev-wrap"><img class="img-prev" src="${e.target.result}"><div class="img-x" onclick="rmMImg('${wid}','${zid}','${key}','${input.id}')">✕</div></div>`;
+    const z = document.getElementById(zid);
+    z.classList.add('filled');
+    z.querySelector('.iz-text').textContent = 'Image attached ✓';
+    z.querySelector('.iz-hint').textContent = 'tap to replace';
+  };
+  r.readAsDataURL(file);
+}
+function rmMImg(wid, zid, key, fid) {
+  mImgs[key] = null;
+  document.getElementById(wid).innerHTML = '';
+  const z = document.getElementById(zid); z.classList.remove('filled');
+  const isQ = key==='mq';
+  z.querySelector('.iz-text').textContent = isQ ? 'Photo of question' : 'Photo of handwritten answer';
+  z.querySelector('.iz-hint').textContent = isQ ? 'past paper · textbook · worksheet' : 'photograph your written work';
+  document.getElementById(fid).value = '';
+}
+
+// TUTOR IMAGE
+function attachImg(input) {
+  const file = input.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = e => {
+    tImg = { base64: e.target.result.split(',')[1], mediaType: file.type||'image/jpeg', src: e.target.result };
+    document.getElementById('tThumb').src = e.target.result;
+    document.getElementById('tThumb').style.display = 'block';
+    document.getElementById('aBtn').classList.add('on');
+    document.getElementById('aInfo').textContent = 'Image ready ✓';
+    document.getElementById('aRm').style.display = 'inline';
+  };
+  r.readAsDataURL(file);
+}
+function rmImg() {
+  tImg = null;
+  document.getElementById('tFile').value = '';
+  document.getElementById('tThumb').style.display = 'none';
+  document.getElementById('tThumb').src = '';
+  document.getElementById('aBtn').classList.remove('on');
+  document.getElementById('aInfo').textContent = 'Attach an image';
+  document.getElementById('aRm').style.display = 'none';
+}
+
+// MARK
+async function doMark() {
+  const q = document.getElementById('mQ').value.trim();
+  const a = document.getElementById('mA').value.trim();
+  const marks = document.getElementById('mMarks').value.trim();
+  const scheme = document.getElementById('mScheme').value.trim();
+  const subj = getSubj('mSubjs');
+  if (!q && !mImgs.mq) { alert('Please provide the question.'); return; }
+  if (!a && !mImgs.ma) { alert('Please provide your answer.'); return; }
+
+  const btn = document.getElementById('markBtn');
+  const box = document.getElementById('mResp');
+  btn.disabled = true; btn.textContent = 'Marking...';
+  box.className = 'resp-box loading show';
+  box.innerHTML = '<div class="spin"></div><span>Examiner is reading your answer...</span>';
+
+  const content = [];
+  let txt = `Subject: ${subj}\n${marks?'Marks available: '+marks+'\n':''}\n`;
+  txt += q ? `QUESTION:\n${q}\n\n` : `QUESTION: [see attached image]\n\n`;
+  txt += a ? `STUDENT ANSWER:\n${a}\n\n` : `STUDENT ANSWER: [see attached image]\n\n`;
+  txt += scheme ? `MARK SCHEME:\n${scheme}\n\n` : `No mark scheme — use spec knowledge.\n\n`;
+  txt += `Mark this answer thoroughly.`;
+  content.push({ type:'text', text:txt });
+  if (mImgs.mq) { content.push({type:'text',text:'QUESTION IMAGE:'}); content.push({type:'image',source:{type:'base64',media_type:mImgs.mq.mediaType,data:mImgs.mq.base64}}); }
+  if (mImgs.ma) { content.push({type:'text',text:'STUDENT HANDWRITTEN ANSWER IMAGE:'}); content.push({type:'image',source:{type:'base64',media_type:mImgs.ma.mediaType,data:mImgs.ma.base64}}); }
+
+  try {
+    const res = await fetch(URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':getKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1400,system:SYS_MARK,messages:[{role:'user',content}]})
+    });
+    const d = await res.json();
+    if (d.error) throw new Error(d.error.message);
+    const text = d.content[0].text;
+    const m = text.match(/TOTAL[:\s]+(\d+)\s*\/\s*(\d+)/i);
+    let sh='', sc='';
+    if (m) { const p=parseInt(m[1])/parseInt(m[2]); sc=p>=0.75?'s-hi':p>=0.5?'s-mid':'s-lo'; sh=`${m[1]}/${m[2]}`; }
+    box.className='resp-box show up';
+    box.innerHTML=`<div class="resp-head"><span class="resp-label">Examiner Feedback — ${subj}</span><span class="score ${sc}">${sh}</span></div><div class="resp-body"></div>`;
+    box.querySelector('.resp-body').textContent = text;
+    box.scrollIntoView({behavior:'smooth',block:'nearest'});
+  } catch(e) {
+    box.className='resp-box show';
+    box.innerHTML=`<div style="color:var(--err)">⚠️ ${e.message}</div><div style="font-size:12px;color:var(--sub);margin-top:8px">Check API key / Anthropic account credits.</div>`;
+  }
+  btn.disabled=false; btn.textContent='Mark My Answer ✓';
+}
+
+// TUTOR
+function tKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();} }
+
+async function sendMsg() {
+  const inp = document.getElementById('tInput');
+  const msg = inp.value.trim();
+  const subj = getSubj('tSubjs');
+  if (!msg && !tImg) return;
+  inp.value=''; inp.style.height='auto';
+
+  const c = document.getElementById('chatMsgs');
+  const div = document.createElement('div');
+  div.className='msg msg-u up';
+  if (tImg) { const im=document.createElement('img'); im.src=tImg.src; im.className='msg-img'; div.appendChild(im); }
+  if (msg) { const s=document.createElement('span'); s.textContent=msg; div.appendChild(s); }
+  c.appendChild(div);
+
+  const uc = [];
+  if (tImg) uc.push({type:'image',source:{type:'base64',media_type:tImg.mediaType,data:tImg.base64}});
+  uc.push({type:'text',text:`[${subj}] ${msg||'Analyse this image for my A-Level revision.'}`});
+  history.push({role:'user',content:uc});
+  rmImg();
+
+  document.getElementById('sendBtn').disabled=true;
+  document.getElementById('typing').style.display='block';
+  scrollT();
+
+  try {
+    const res = await fetch(URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':getKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:SYS_TUTOR,messages:history})
+    });
+    const d = await res.json();
+    if(d.error) throw new Error(d.error.message);
+    const reply = d.content[0].text;
+    history.push({role:'assistant',content:reply});
+    document.getElementById('typing').style.display='none';
+    addAI(reply);
+  } catch(e) {
+    document.getElementById('typing').style.display='none';
+    addAI(`⚠️ ${e.message}`);
+  }
+  document.getElementById('sendBtn').disabled=false;
+  scrollT();
+}
+
+function addAI(text) {
+  const d=document.createElement('div'); d.className='msg msg-a up'; d.textContent=text;
+  document.getElementById('chatMsgs').appendChild(d); scrollT();
+}
+function scrollT() { const s=document.getElementById('screen-tutor'); setTimeout(()=>s.scrollTo({top:s.scrollHeight,behavior:'smooth'}),100); }
+function clearChat() { history=[]; document.getElementById('chatMsgs').innerHTML=''; }
+
+document.addEventListener('input',e=>{ if(e.target.tagName==='TEXTAREA'){e.target.style.height='auto';e.target.style.height=Math.min(e.target.scrollHeight,180)+'px';} });
+document.addEventListener('DOMContentLoaded',()=>{ const k=document.getElementById('keyInput'); if(k) k.addEventListener('keydown',e=>{if(e.key==='Enter')saveKey();}); });
+</script>
+
+</body>
+</html>
